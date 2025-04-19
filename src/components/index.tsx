@@ -5,3 +5,4 @@ export { default as Footer } from './Layouts/Footer';
 export { default as Header } from './Layouts/Header';
 export { default as About } from './About/About';
 export { default as Home } from './Home/Home';
+export type { CountryDataData ,CountryData, CountryProps } from './Home/Home';
