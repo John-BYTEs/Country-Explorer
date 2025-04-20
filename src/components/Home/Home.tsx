@@ -1,5 +1,7 @@
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import globeLoad from "../../assets/globe.gif";
+import Flag from "../Flag/Flag";
+import search from '../../assets/search.svg'
 
 export interface CountryDataData{
   latitude: string;
@@ -23,92 +25,70 @@ export interface CountryData {
 
 export interface CountryProps {
   countries: CountryData[];
-  loading?: boolean;
+  regions: string[];
+  loading: boolean;
 }
 
-export default function Home({ countries, loading }: CountryProps) {
+export default function Home({ countries, regions, loading }: CountryProps) {
   const [query, setQuery] = useState("");
-  const navigate = useNavigate();
+  const [selectedRegion, setSelectedRegion] = useState<string>("");
+  
 
-  const country = countries.filter((cntry) => 
-    cntry.name.toLowerCase().startsWith(query.toLowerCase())
+  const country = countries.filter((cntry) => {
+    const search = cntry.name.toLowerCase().startsWith(query.toLowerCase());
+    const reg = selectedRegion ? cntry.region === selectedRegion : true;
+    return search && reg;
+  }
   );
 
-  if (loading) return <p>Loading...</p>;
 
-  return (
+  if (loading)
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-vistBlue font-mono text-3xl text-center font-extrabold">
+          <img src={globeLoad} alt="Loading" className="mx-auto" />
+          <h1>Traveling...</h1>
+        </div>
+      </div>
+    );
+
+  return ( 
     <>
       <div className="px-12 py-6 scroll-smooth">
-        <div className="flex items-center flex-col space-y-5 sm:space-y-0 sm:flex-row justify-between">
-          <div className="flex items-center w-80 2xl:w-[28rem] sm:w-96 text-gray-900 shadow-md space-x-2 dark:text-lightelem bg-white rounded-sm 2xl:px-6 2xl:py-5 px-4 py-3 dark:bg-darkelem">
+        <div className="flex items-center flex-col space-y-5 sm:space-y-0 sm:flex-row space-x-4">
+          <div className="flex items-center 2xl:w-[28rem] sm:w-96 text-amber-100 shadow-md space-x-2 bg-gray-700 rounded-sm 2xl:px-6 2xl:py-5 px-4 py-3">
+            <img src={search}/>
             <input
-              className="bg-transparent outline-none  "
+              className="bg-transparent outline-none font-mono"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search countries"
+              placeholder="Search countries..."
             />
           </div>
+          <div className="flex items-center bg-gray-700 rounded-sm">
+          <select
+            value={selectedRegion}
+            onChange={(r) => setSelectedRegion(r.target.value)}
+            className="font-bold font-mono text-amber-100 border-gray-700 rounded-xs px-4 py-2 shadow-sm focus:outline-none focus:ring-0 focus:border-transparent">
+
+            <option className="font-bold font-mono bg-grBody " value="">All</option>
+            {regions.map((region) => (
+              <option className="font-bold font-mono bg-grBody text-amber-100" value={region}>
+                {region}
+              </option>
+            ))}
+            </select>
+            </div>
         </div>
 
         <div className="grid scroll-smooth sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 mt-5 gap-10 xl:gap-16">
-          {query && (
+          {query ? (
               country.map((cntry) => (
-                <div
-                  key={cntry.name}
-                  onClick={() => navigate(`/country/${cntry.name}`)}
-                  className="bg-white rounded-md overflow-hidden cursor-pointer transition text-gray-900 shadow-md"
-                
-                >
-                  <div>
-                  <img src={cntry.flag} alt={cntry.name} />
-                  </div>
-                  <div className="font-semibold text-sm px-4 py-5 font-mono">
-                  <p className="text-xl font-bold">{cntry.name}</p>
-                    <p>
-                      Population: 
-                      <span>{cntry.population}</span>
-                    </p>
-                    <p>
-                      Region:
-                      <span>{cntry.region}</span> 
-                    </p>
-                    <p>
-                      Capital:
-                      <span>{cntry.capital}</span>
-                    </p>
-                  </div>
-                </div>
+                <Flag cntry={cntry}/>
               ))
-          )}
-
-          {!query && (
-              countries.map((cntry) => (
-                <div
-                  key={cntry.name}
-                  onClick={() => navigate(`/country/${cntry.name}`)}
-                  className="bg-white rounded-md overflow-hidden cursor-pointer transition text-gray-900 shadow-md"
-                >
-                  <div>
-                  <img src={cntry.flag} alt={cntry.name} />
-                  </div>
-                  <div className="font-semibold text-sm px-4 py-5 font-mono">
-                  <p className="text-xl font-bold">{cntry.name}</p>
-                    <p>
-                      Population: 
-                      <span>{cntry.population}</span>
-                    </p>
-                    <p>
-                      Region:
-                      <span>{cntry.region}</span> 
-                    </p>
-                    <p>
-                      Capital:
-                      <span>{cntry.capital}</span>
-                    </p>
-                  </div>
-                </div>
-              ))
-          )}
+          ) : countries.map((cntry) => (
+            <Flag cntry={cntry}/>
+          ))}
         </div>
       </div>
     </>
